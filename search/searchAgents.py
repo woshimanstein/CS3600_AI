@@ -149,7 +149,6 @@ class PositionSearchProblem(search.SearchProblem):
         costFn: A function from a search state (tuple) to a non-negative number
         goal: A position in the gameState
         """
-        self.gameState = gameState
         self.walls = gameState.getWalls()
         self.startState = gameState.getPacmanPosition()
         if start != None: self.startState = start
@@ -223,9 +222,6 @@ class PositionSearchProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
             cost += self.costFn((x,y))
         return cost
-
-    def getCurrentState(self):
-        return self.gameState
 
 class StayEastSearchAgent(SearchAgent):
     """
@@ -611,32 +607,13 @@ class ApproximateSearchAgent(Agent):
     "Implement your contest entry here.  Change anything but the class name."
 
     def registerInitialState(self, state):
-        top, right = state.getWalls().height-2, state.getWalls().width-2
-        self.corners = ((1,1), (1,top), (right, 1), (right, top))
-        self.startPosition = state.getPacmanPosition()
-        self.actions = []
-        currentState = state
-        while(currentState.getFood().count() > 0):
-            nextPathSegment = self.findPathToClosestDot(currentState) # The missing piece
-            self.actions += nextPathSegment
-            for action in nextPathSegment:
-                legal = currentState.getLegalActions()
-                if action not in legal:
-                    t = (str(action), str(currentState))
-                    raise Exception, 'findPathToClosestDot returned an illegal move: %s!\n%s' % t
-                currentState = currentState.generateSuccessor(0, action)
-        self.actionIndex = 0
-        print 'Path found with cost %d.' % len(self.actions)
-
-    def findPathToClosestDot(self, gameState):
-        "Returns a path (a list of actions) to the closest dot, starting from gameState"
-        # Here are some useful elements of the startState
-        startPosition = gameState.getPacmanPosition()
-        food = gameState.getFood()
-        walls = gameState.getWalls()
-        problem = AnyFoodSearchProblem(gameState)
-
-        return search.breadthFirstSearch(problem)
+        if self.searchFunction == None: raise Exception, "No search function provided for SearchAgent"
+        starttime = time.time()
+        problem = self.searchType(state) # Makes a new search problem
+        self.actions  = self.searchFunction(problem) # Find a path
+        totalCost = problem.getCostOfActions(self.actions)
+        print('Path found with total cost of %d in %.1f seconds' % (totalCost, time.time() - starttime))
+        if '_expanded' in dir(problem): print('Search nodes expanded: %d' % problem._expanded)
 
     def getAction(self, state):
         """
@@ -644,13 +621,8 @@ class ApproximateSearchAgent(Agent):
         The Agent will receive a GameState and must return an action from
         Directions.{North, South, East, West, Stop}
         """
-        if 'actionIndex' not in dir(self): self.actionIndex = 0
-        i = self.actionIndex
-        self.actionIndex += 1
-        if i < len(self.actions):
-            return self.actions[i]
-        else:
-            return Directions.STOP
+        "*** YOUR CODE HERE ***"
+        util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):
     """
