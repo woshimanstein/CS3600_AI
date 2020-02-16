@@ -375,8 +375,7 @@ class CrawlingRobot:
         self.robotHand = canvas.create_line(0,0,0,0,fill='red',width=3)
 
         self.positions = [0,0]
-  #      self.angleSums = [0,0]
-
+        # self.angleSums = [0,0]
 
 
 if __name__ == '__main__':
