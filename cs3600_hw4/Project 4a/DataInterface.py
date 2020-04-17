@@ -1,3 +1,27 @@
+# def getKidneyDataSset(start = None, end = None):
+#   examples=[]
+#   attrValues={}
+#   data = open("kidney_dataset/Chronic_Kidney_Disease/chronic_kidney_disease.arff")
+#   examples = []
+#   attrValues = {}
+#   labelValues = ["ckd", "notckd"]
+#   startData = False
+#   for line in data:
+#     if not startData:
+#       if line == "@data":
+#         startData = True
+#     else:
+#       dict = {}
+#       examples.append(dict)
+#       count = 0
+#       for val in line.split(','):
+#         if count == 24:
+#           dict['class'] = val[:-1]
+#         else:
+          
+
+
+
 def getConnect4Dataset(start = None, end = None):
   """
   Reads in and parses through the Connect4 dataset.

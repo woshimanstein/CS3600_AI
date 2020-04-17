@@ -1,5 +1,6 @@
 from math import log
 import sys
+from scipy.stats.stats import chisqprob
 
 class Node:
   """
@@ -321,7 +322,7 @@ def makeSubtrees(remainingAttributes,examples,attributeValues,className,defaultL
         node = Node(bestAttribute)
         for value in attributeValues[bestAttribute]:
             subset = getPertinentExamples(examples, bestAttribute, value)
-            subTree = makeSubtrees(remainingAttributes, subset, attributeValues, className, getMostCommonClass(examples, className), setScoreFunc, gainFunc)
+            subTree = makeSubtrees(updatedAttributes, subset, attributeValues, className, getMostCommonClass(examples, className), setScoreFunc, gainFunc)
             node.children.update({value:subTree})
         return node
 
@@ -364,4 +365,71 @@ def makePrunedSubtrees(remainingAttributes,examples,attributeValues,className,de
         Node or LeafNode
         The classification tree node optimal for the remaining set of attributes.
     """
-    #YOUR CODE HERE (Extra Credit)
+    if len(examples) == 0: # empty examples
+        return LeafNode(defaultLabel)
+    elif len(getClassCounts(examples, className)) == 1: # only one class
+        return LeafNode(examples[0][className])
+    elif len(remainingAttributes) == 0: # no more attributes available
+        return LeafNode(getMostCommonClass(examples, className))
+    else:       
+        bestAttribute = remainingAttributes[0]
+        maxGain = gainFunc(examples, bestAttribute, attributeValues[bestAttribute], className)
+        for i in range(1, len(remainingAttributes)):
+            newGain = gainFunc(examples, remainingAttributes[i], attributeValues[remainingAttributes[i]], className)
+            if newGain > maxGain:
+                maxGain = newGain
+                bestAttribute = remainingAttributes[i]
+        updatedAttributes = remainingAttributes[:]
+        updatedAttributes.remove(bestAttribute)
+
+        #prune
+        # dict1 = getAttributeCounts(examples, bestAttribute, attributeValues[bestAttribute], className)
+        # dict2 = {}
+        # for key in dict1.keys():
+        #     classCount = 0
+        #     for item in dict1[key].keys():
+        #         classCount += dict1[key][item]
+        #     dict2[key] = classCount
+        # classCounts = getClassCounts(examples, className)
+        # deviation = 0
+        # for key in dict1.keys():
+        #     chi = 0
+        #     for item in dict1[key].keys():
+        #         pi = 1.0*dict1[key][item]
+        #         piAverage = (1.0*classCounts[item] / len(examples)) * dict2[key]
+        #         chi += (pi - piAverage) ** 2 / piAverage
+        #     deviation += chi
+        # degree = len(attributeValues[bestAttribute]) - 1
+        # if chi2.pdf(deviation, degree) > q:
+        #     return LeafNode(getMostCommonClass(examples, className))
+
+        attributeCounts = getAttributeCounts(examples, bestAttribute, attributeValues[bestAttribute], className)
+        sizeDict = {}
+        for value in attributeCounts.keys():
+            size = 0
+            for classLabel in attributeCounts[value].keys():
+                size += attributeCounts[value][classLabel]
+            sizeDict[value] = size
+
+        classCount = getClassCounts(examples, className)
+        deviation = 0
+        for value in attributeCounts.keys():
+            subClassCount = attributeCounts[value]
+            for classValue in subClassCount.keys():
+                originalNumber = classCount[classValue]
+                expected = 1.0 * originalNumber * sizeDict[value] / len(examples)
+                actual = subClassCount[classValue]
+                deviation += (actual - expected) ** 2 / expected
+        degree = len(attributeValues[bestAttribute])
+        print "deviation: ", deviation
+        print "q: " ,q
+        print "degree of freedom: ", degree
+        if chisqprob(deviation, degree) > q:
+            return LeafNode(getMostCommonClass(examples, className))
+
+        node = Node(bestAttribute)
+        for value in attributeValues[bestAttribute]:
+            subset = getPertinentExamples(examples, bestAttribute, value)
+            subTree = makeSubtrees(updatedAttributes, subset, attributeValues, className, getMostCommonClass(examples, className), setScoreFunc, gainFunc)
+            node.children.update({value:subTree})
+        return node

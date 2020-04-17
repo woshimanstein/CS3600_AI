@@ -107,5 +107,16 @@ def testCar(setFunc = setEntropy, infoFunc = infoGain):
     printDemarcation()
     return (tree,evaluation)
 
-testCar()
-testConnect4()
+def carInfo():
+    dataset = getCarDataset()
+    examples = dataset[0]
+    classCounts = {}
+    for example in examples:
+        value = example["label"]
+        if value in classCounts:
+            classCounts[value] += 1
+        else:
+            classCounts.update({value:1})
+    print classCounts
+
+testDummySet2()
