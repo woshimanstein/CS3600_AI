@@ -408,19 +408,19 @@ def makePrunedSubtrees(remainingAttributes,examples,attributeValues,className,de
         #     return LeafNode(getMostCommonClass(examples, className))
 
         attributeCounts = getAttributeCounts(examples, bestAttribute, attributeValues[bestAttribute], className)
-        print "attributes counts: ", attributeCounts
+        # print "attributes counts: ", attributeCounts
         sizeDict = {}
         for value in attributeCounts.keys():
             size = 0
             for classLabel in attributeCounts[value].keys():
                 size += attributeCounts[value][classLabel]
             sizeDict[value] = size
-        print "size of examples: ", len(examples)
-        print "size dict: ", sizeDict
+        # print "size of examples: ", len(examples)
+        # print "size dict: ", sizeDict
 
 
         classCount = getClassCounts(examples, className)
-        print "class count: ", classCount
+        # print "class count: ", classCount
         deviation = 0
         for value in attributeCounts.keys():
             subClassCount = attributeCounts[value]
@@ -433,9 +433,9 @@ def makePrunedSubtrees(remainingAttributes,examples,attributeValues,className,de
                 print "---------------------------------------"
 
         degree = len(attributeCounts) - 1
-        print "deviation: ", deviation
-        print "q: " ,q
-        print "degree of freedom: ", degree
+        # print "deviation: ", deviation
+        # print "q: " ,q
+        # print "degree of freedom: ", degree
         if chisqprob(deviation, degree) > q:
             return LeafNode(getMostCommonClass(examples, className))
 
