@@ -1,6 +1,6 @@
 from math import log, sqrt
 import sys
-from scipy.stats.distributions import chi2
+from scipy.stats.stats import chisqprob
 
 
 class Node:
@@ -436,7 +436,7 @@ def makePrunedSubtrees(remainingAttributes,examples,attributeValues,className,de
         print "deviation: ", deviation
         print "q: " ,q
         print "degree of freedom: ", degree
-        if chi2.sf(deviation, degree) > q:
+        if chisqprob(deviation, degree) > q:
             return LeafNode(getMostCommonClass(examples, className))
 
         node = Node(bestAttribute)
