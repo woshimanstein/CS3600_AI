@@ -1,6 +1,7 @@
-from math import log
+from math import log, sqrt
 import sys
-from scipy.stats.stats import chisqprob
+from scipy.stats.distributions import chi2
+
 
 class Node:
   """
@@ -400,31 +401,42 @@ def makePrunedSubtrees(remainingAttributes,examples,attributeValues,className,de
         #         chi += (pi - piAverage) ** 2 / piAverage
         #     deviation += chi
         # degree = len(attributeValues[bestAttribute]) - 1
-        # if chi2.pdf(deviation, degree) > q:
+        # print "deviation: ", deviation
+        # print "q: " ,q
+        # print "degree of freedom: ", degree
+        # if chi2.sf(deviation, degree) > q:
         #     return LeafNode(getMostCommonClass(examples, className))
 
         attributeCounts = getAttributeCounts(examples, bestAttribute, attributeValues[bestAttribute], className)
+        print "attributes counts: ", attributeCounts
         sizeDict = {}
         for value in attributeCounts.keys():
             size = 0
             for classLabel in attributeCounts[value].keys():
                 size += attributeCounts[value][classLabel]
             sizeDict[value] = size
+        print "size of examples: ", len(examples)
+        print "size dict: ", sizeDict
+
 
         classCount = getClassCounts(examples, className)
+        print "class count: ", classCount
         deviation = 0
         for value in attributeCounts.keys():
             subClassCount = attributeCounts[value]
-            for classValue in subClassCount.keys():
-                originalNumber = classCount[classValue]
-                expected = 1.0 * originalNumber * sizeDict[value] / len(examples)
-                actual = subClassCount[classValue]
-                deviation += (actual - expected) ** 2 / expected
-        degree = len(attributeValues[bestAttribute])
+            for classLabel in subClassCount.keys():
+                expected = 1.0 * classCount[classLabel] * sizeDict[value] / len(examples)
+                actual = subClassCount[classLabel]
+                deviation += (actual - expected) * (actual - expected) / expected
+                print "actual = ", actual
+                print "expected = ", expected
+                print "---------------------------------------"
+
+        degree = len(attributeCounts) - 1
         print "deviation: ", deviation
         print "q: " ,q
         print "degree of freedom: ", degree
-        if chisqprob(deviation, degree) > q:
+        if chi2.sf(deviation, degree) > q:
             return LeafNode(getMostCommonClass(examples, className))
 
         node = Node(bestAttribute)
